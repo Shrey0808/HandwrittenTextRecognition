@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handwritten Text Recognition</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #e8f0fe;
+        }
+
+        .container {
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 25px;
+            max-width: 400px;
+            text-align: center;
+            margin-top: 5%;
+            margin-bottom: 5%;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-weight: bold;
+            color: #555555;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .dropzone {
+            border: 2px dashed #007bff;
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+        }
+
+        .dropzone.dragover {
+            background-color: #f0f8ff;
+        }
+
+        img {
+            max-width: 100%;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+
+        .results {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .result-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 5px;
+        }
+
+        .result-item img {
+            width: 48px;
+            margin-bottom: 50px;
+        }
+
+        .result-item p {
+            font-weight: bold;
+            color: #007bff;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container" id="res">
+        <h2>Handwritten Text Recognition Using Deep Learning</h2>
+        <form id="upload-form" action="/predict" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="image" class="form-label">Choose an image to upload</label>
+                <div id="dropzone" class="dropzone">
+                    <img src="static/images/upload.png" alt="Click here to choose image to upload">
+                </div>
+                <input type="file" class="form-control-file" id="image" name="image" accept="image/*" required style="display: none;">
+                <img id="preview" src="#" alt="Image Preview" style="display: none;">
+            </div>
+            <button type="submit" class="btn btn-primary">Upload Image</button>
+        </form>
+        <div class="results" id="results">
+            {% if results %}
+                {% for result in results %}
+                    <div class="result-item">
+                        <img src="data:image/png;base64,{{ result.image }}" alt="Prediction Image">
+                        <p>{{ result.prediction }}</p>
+                    </div>
+                {% endfor %}
+            {% elif error %}
+                <p>Error: {{ error }}</p>
+            {% endif %}
+        </div>
+    </div>
+    <!--  THIS JAVASCRIPT FILE CODE IS NOT AT ALL IMPORTANT. THIS IS ONLY ADDED FOR DRAG - AND DROP FEATURE AND PREVIEWING THE UPLOADED IMAGE -->
+    <script>
+        const dropzone = document.getElementById('dropzone');
+        const imageInput = document.getElementById('image');
+        const preview = document.getElementById('preview');
+    
+        // Trigger file input when clicking on dropzone
+        dropzone.addEventListener('click', () => imageInput.click());
+    
+        // Handle drag over and leave effects
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+    
+        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+    
+        // Handle dropped files
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length) {
+                imageInput.files = files; // Sync input with dropped file
+                displayPreview(files[0]); // Display the preview
+            }
+        });
+    
+        // Handle file selection from input
+        imageInput.addEventListener('change', (e) => {
+            const files = e.target.files;
+            if (files.length) {
+                displayPreview(files[0]); // Display the preview
+            }
+        });
+    
+        // Function to display image preview
+        function displayPreview(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                preview.src = e.target.result; // Set the image preview source
+                preview.style.display = 'block'; // Show the preview
+            };
+            reader.readAsDataURL(file); // Read the file as a Data URL
+        }
+    </script>
+    
+</body>
+
+</html>
